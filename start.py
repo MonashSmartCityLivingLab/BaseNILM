@@ -59,7 +59,7 @@ setupExp['author'] = 'Pascal Schirmer'                                          
 # General
 # ------------------------------------------
 setupExp['sim'] = 0                                                                                                      # 0) simulation, 1) optimisation hyperparameters, 2) optimising grid
-setupExp['gpu'] = 0                                                                                                      # 0) cpu, 1) gpu
+setupExp['gpu'] = 1                                                                                                      # 0) cpu, 1) gpu
 setupExp['warn'] = 3                                                                                                     # 0) all msg are logged, 1) INFO not logged, 2) INFO and WARN not logged, 3) disabled
 
 # ------------------------------------------
@@ -68,7 +68,7 @@ setupExp['warn'] = 3                                                            
 setupExp['method'] = 0                                                                                                   # 0) 1-fold with data split, 1) k-fold with cross validation, 2) transfer learning with different datasets, 3) id based
 setupExp['trainBatch'] = 0                                                                                               # 0) all no batching, 1) fixed batch size (see data batch parameter), 2) id based
 setupExp['kfold'] = 10                                                                                                   # number of folds for method 1)
-setupExp['train'] = 0                                                                                                    # 0) no training (trying to load model), 1) training new model (or retraining)
+setupExp['train'] = 1                                                                                                    # 0) no training (trying to load model), 1) training new model (or retraining)
 setupExp['test'] = 1                                                                                                     # 0) no testing, 1) testing
 
 # ------------------------------------------
@@ -86,7 +86,7 @@ setupExp['plot'] = 1                                                            
 # ------------------------------------------
 setupDat['type'] = 'mat'                                                                                                 # data input type: 1) 'xlsx', 2) 'csv', 3) 'mat', 4) 'pkl', 5) 'h5'
 setupDat['freq'] = 'LF'                                                                                                  # 'LF': low-frequency data, 'HF': high-frequency data
-setupDat['dim'] = 3                                                                                                      # 2) 2D input data, 3) 3D input data
+setupDat['dim'] = 2                                                                                                      # 2) 2D input data, 3) 3D input data
 setupDat['batch'] = 100000                                                                                               # number of samples fed at once to training
 setupDat['Shuffle'] = False                                                                                              # False: no shuffling, True: shuffling data when splitting
 setupDat['rT'] = 10/12                                                                                                   # training proportion (0, 1)
@@ -97,24 +97,24 @@ setupDat['idV'] = [2]                                                           
 # ------------------------------------------
 # Datasets
 # ------------------------------------------
-setupDat['folder'] = 'ampds'                                                                                             # name of the folder for the dataset under \data
+setupDat['folder'] = 'msc'                                                                                             # name of the folder for the dataset under \data
 setupDat['house'] = 1                                                                                                    # only when loading nilmtk converted files with '.h5' format
-setupDat['train'] = ['ampds2']                                                                                           # name of training datasets (multiple)
-setupDat['test'] = 'ampds2'                                                                                              # name of testing datasets (one)
-setupDat['val'] = 'ampds2'                                                                                               # name of validation dataset (one)
+setupDat['train'] = ['prepareddata']                                                                                           # name of training datasets (multiple)
+setupDat['test'] = 'prepareddata'                                                                                              # name of testing datasets (one)
+setupDat['val'] = 'prepareddata'                                                                                               # name of validation dataset (one)
 
 # ------------------------------------------
 # Input/ Output Mapping
 # ------------------------------------------
 setupDat['inp'] = []                                                                                                     # names of the input variables (X), if empty all features are used
-setupDat['out'] = ['DWE', 'FRE', 'HPE', 'WOE', 'CDE']                                                                    # names of the output variables (y), if empty all appliances are used
+setupDat['out'] = []                                                                    # names of the output variables (y), if empty all appliances are used
 setupDat['outFeat'] = 0                                                                                                  # if data is three-dimensional, the output axis must be defined
 setupDat['outEnergy'] = 0.0                                                                                              # 0) appliances are selected based on the list, 1) appliances are selected to capture x % of the total energy
 
 # ------------------------------------------
 # Sampling
 # ------------------------------------------
-setupDat['fs'] = 1/60                                                                                                    # sampling frequency (Hz) for HF data this is the LF output frequency of (y)
+setupDat['fs'] = 1                                                                                                    # sampling frequency (Hz) for HF data this is the LF output frequency of (y)
 setupDat['lim'] = 365*24*60                                                                                              # 0) data is not limited, x) limited to x samples
 
 # ------------------------------------------
@@ -149,10 +149,10 @@ setupPar['modelInpDim'] = 3                                                     
 # ------------------------------------------
 setupPar['frame'] = 1                                                                                                    # 0) no framing, 1) framing
 setupPar['feat'] = 0                                                                                                     # 0) raw data values, 1) statistical features (frame based), 2) statistical features (input based), 3) input and frame based features, 4) 2D features
-setupPar['window'] = 20                                                                                                  # window length (samples)
-setupPar['overlap'] = 19                                                                                                 # overlap between consecutive windows (no overlap during test if -1)
+setupPar['window'] = 3                                                                                                  # window length (samples)
+setupPar['overlap'] = -1                                                                                                 # overlap between consecutive windows (no overlap during test if -1)
 setupPar['outseq'] = 0                                                                                                   # 0) seq2point, x) length of the subsequence in samples
-setupPar['yFocus'] = 10                                                                                                  # focus point for seq2point (average if -1)
+setupPar['yFocus'] = -1                                                                                                  # focus point for seq2point (average if -1)
 setupPar['nDim'] = 2                                                                                                     # input dimension for model 1D (1), 2D (2), or 3D (3)
 
 # ------------------------------------------
@@ -166,6 +166,7 @@ setupPar['outMax'] = 5500                                                       
 # Model Parameters
 # ==============================================================================
 setupMdl = mdlPara(setupMdl)
+setupMdl['metric'] = 'TECA'
 
 
 #######################################################################################################################

@@ -14,3 +14,5 @@ pyts~=0.13.0
 psutil~=5.9.8
 dtw-python==1.4.4
 keras-tuner==1.4.7
+h5py
+hdf5plugin
