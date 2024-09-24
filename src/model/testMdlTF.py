@@ -179,7 +179,8 @@ def testMdlTF(data, setupDat, setupPar, setupMdl, setupExp):
     try:
         mdl.load_weights(mdlName)
         print("INFO: Model loaded")
-    except:
+    except Exception as e:
+        print(e)
         print("ERROR: Model could not be loaded")
 
     ###################################################################################################################

@@ -86,7 +86,7 @@ setupExp['plot'] = 1                                                            
 # ------------------------------------------
 setupDat['type'] = 'mat'                                                                                                 # data input type: 1) 'xlsx', 2) 'csv', 3) 'mat', 4) 'pkl', 5) 'h5'
 setupDat['freq'] = 'LF'                                                                                                  # 'LF': low-frequency data, 'HF': high-frequency data
-setupDat['dim'] = 2                                                                                                      # 2) 2D input data, 3) 3D input data
+setupDat['dim'] = 3                                                                                                      # 2) 2D input data, 3) 3D input data
 setupDat['batch'] = 100000                                                                                               # number of samples fed at once to training
 setupDat['Shuffle'] = False                                                                                              # False: no shuffling, True: shuffling data when splitting
 setupDat['rT'] = 10/12                                                                                                   # training proportion (0, 1)
@@ -97,11 +97,11 @@ setupDat['idV'] = [2]                                                           
 # ------------------------------------------
 # Datasets
 # ------------------------------------------
-setupDat['folder'] = 'msc'                                                                                             # name of the folder for the dataset under \data
+setupDat['folder'] = 'ampds'                                                                                             # name of the folder for the dataset under \data
 setupDat['house'] = 1                                                                                                    # only when loading nilmtk converted files with '.h5' format
-setupDat['train'] = ['prepareddata']                                                                                           # name of training datasets (multiple)
-setupDat['test'] = 'prepareddata'                                                                                              # name of testing datasets (one)
-setupDat['val'] = 'prepareddata'                                                                                               # name of validation dataset (one)
+setupDat['train'] = ['ampds2']                                                                                           # name of training datasets (multiple)
+setupDat['test'] = 'ampds2'                                                                                              # name of testing datasets (one)
+setupDat['val'] = 'ampds2'                                                                                               # name of validation dataset (one)
 
 # ------------------------------------------
 # Input/ Output Mapping
@@ -114,7 +114,7 @@ setupDat['outEnergy'] = 0.0                                                     
 # ------------------------------------------
 # Sampling
 # ------------------------------------------
-setupDat['fs'] = 1                                                                                                    # sampling frequency (Hz) for HF data this is the LF output frequency of (y)
+setupDat['fs'] = 1/60                                                                                                    # sampling frequency (Hz) for HF data this is the LF output frequency of (y)
 setupDat['lim'] = 365*24*60                                                                                              # 0) data is not limited, x) limited to x samples
 
 # ------------------------------------------

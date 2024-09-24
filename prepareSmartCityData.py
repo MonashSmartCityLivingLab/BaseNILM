@@ -16,8 +16,27 @@ appliance_mappings = {
     "athom-smart-plug-v2-a76459": "UNK"
 }
 
-start_datetime ='2024-07-23 21:30:00'
-end_datetime = '2024-08-11 12:40:00'
+# start_datetime = '2024-07-23 21:30:00'
+# end_datetime = '2024-09-08 12:40:00'
+start_datetime = '2024-08-20 12:40:00'
+end_datetime = '2024-08-21 12:40:00'
+
+
+# Function to read and process individual CSV files
+def readAndProcessCsv(file_path):
+    # Read in CSV and set index
+    df = pd.read_csv(file_path)
+    df['Date & Time'] = pd.to_datetime(df['Date & Time'], format='ISO8601')
+
+    # Find the first and last non-zero consumption index
+    first_non_zero_idx = df[df['Consumption(kWh)'] != 0].index[0]
+    last_non_zero_idx = df[df['Consumption(kWh)'] != 0].index[-1]
+
+    # Trim the dataframe to only include rows between the first and last non-zero consumption
+    df = df.loc[first_non_zero_idx:last_non_zero_idx]
+
+    return df
+
 
 def convertKwhToW(value):
     return (value * 1000) / (1/6)
@@ -41,34 +60,43 @@ labelOut = ['time', 'id']
 unitOut = ['sec', '-', 'W', 'W', 'W', 'W', 'W', 'W', 'W']
 mat_template['unitOut'] = unitOut
 
-# Read in central data csv
-central_df = pd.read_csv("data/msc/central-data/Emerald_13-07-2024-11-08-2024.csv")
+# Read in central data csv files
+# 4320 + 4320 + 1296 Records = 9936 Records
+central_csv_files = [
+    "data/msc-updated/central-data/Emerald_13-07-2024-11-08-2024.csv",
+    "data/msc-updated/central-data/Emerald_05-08-2024-03-09-2024.csv",
+    "data/msc-updated/central-data/Emerald_03-09-2024-11-09-2024.csv"
+]
 
-# Trim starting zeros from dataframe
-first_non_zero_index = 1569  # Hardcoded for sample data
-central_df = central_df.iloc[first_non_zero_index:].reset_index(drop=True)
+# Create and concatenate dataframe based on csv files
+central_dataframes = [readAndProcessCsv(file) for file in central_csv_files]
+combined_central_df = pd.concat(central_dataframes)
 
-# Trim ending zeros from dataframe
-last_non_zero_index = central_df[central_df['Consumption(kWh)'] != 0].index[-1]
-central_df = central_df.iloc[:last_non_zero_index]
+# Remove duplicates based on 'Date & Time' column, keeping the last occurrence
+combined_central_df = combined_central_df.drop_duplicates(subset='Date & Time', keep='last')
 
 # Trim dataset to provided dates
-central_df['Date & Time'] = pd.to_datetime(central_df['Date & Time'], format='ISO8601')
-central_df.set_index('Date & Time', inplace=True)
-central_df = central_df.loc[start_datetime:end_datetime]
-central_df.reset_index(inplace=True)
+combined_central_df['Date & Time'] = pd.to_datetime(combined_central_df['Date & Time'], format='ISO8601')
+combined_central_df.set_index('Date & Time', inplace=True)
+combined_central_df = combined_central_df.loc[start_datetime:end_datetime]
 
-# Get start and end timestamps
-# start_datetime = central_df['Date & Time'].iloc[0]
-# end_datetime = central_df['Date & Time'].iloc[-1]
+resampled_df = combined_central_df.resample('20s').asfreq()
+
+# Interpolate the 'Consumption(kWh)' column
+resampled_df['Consumption(kWh)'] = resampled_df['Consumption(kWh)'].interpolate()
+
+# Divide the interpolated values by 30
+resampled_df['Consumption(kWh)'] /= 30
+
+resampled_df.reset_index(inplace=True)
 
 print(f"Start Date: {start_datetime}")
 print(f"End Date: {end_datetime}")
 
 # Create resultant input dataframe
-time_counter = range(len(central_df))
-id_col = [1] * len(central_df)
-consumption_col = central_df['Consumption(kWh)'].apply(convertKwhToW)
+time_counter = range(len(resampled_df))
+id_col = [1] * len(resampled_df)
+consumption_col = resampled_df['Consumption(kWh)'].apply(convertKwhToW)
 
 input_df = pd.DataFrame({
     'timeCounter': time_counter,
@@ -80,7 +108,7 @@ input_df = pd.DataFrame({
 mat_template['input'] = torch.tensor(np.array(input_df))
 
 # Read in appliance data csv
-appliance_data_dirs = [x[0] for x in os.walk('data/msc') if x[0].startswith('data/msc/csvdata')]
+appliance_data_dirs = [x[0] for x in os.walk('data/msc-updated') if x[0].startswith('data/msc-updated/csvdata')]
 
 # Read in appliance consumption csv's
 appliance_dfs = None
@@ -101,7 +129,7 @@ for appliance in appliance_dfs:
     df = df.sort_values(by='timestamp')
     df.set_index('timestamp', inplace=True)
 
-    resampled_df = df.resample('10min').agg({
+    resampled_df = df.resample('20s').agg({
         'id': 'first',
         'data': 'first',
         'device_name': 'first',
@@ -119,9 +147,11 @@ for i, (k, v) in enumerate(appliance_dfs.items()):
     labelOut.append(appliance_mappings[k])
 output_df['id'] = 1
 output_df['timeCounter'] = range(0, 0 + len(output_df))
+output_df['OTH'] = output_df['OTH'].fillna(0)
 
 mat_template['output'] = torch.tensor(np.array(output_df[['timeCounter', 'id', 'MCR', 'WME', 'LMP', 'TVE', 'HEA', 'OTH', 'UNK']]))
 mat_template['labelOut'] = labelOut
 
-# # Save mat file
-scipy.io.savemat('data/msc/prepareddata.mat', mat_template)
+# Save mat file
+scipy.io.savemat('data/msc-updated/trainingdata.mat', mat_template)
+# scipy.io.savemat('data/msc-updated/prepareddata.mat', mat_template)

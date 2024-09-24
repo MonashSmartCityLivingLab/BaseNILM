@@ -27,6 +27,8 @@ This function plots the time domain results as well as the accuracy results.
 # ==============================================================================
 # External
 # ==============================================================================
+import matplotlib
+matplotlib.use('TkAgg')
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
@@ -132,19 +134,19 @@ def plotting(dataRaw, data, dataPred, resultsAvg, feaScore, feaError, setupDat, 
     # ------------------------------------------
     # Plotting
     # ------------------------------------------
-    fig, axs = plt.subplots(row_max, 1, sharex=True)
-    txt = "Time-domain plots of input features"
-    plt.suptitle(txt, size=18)
-    plt.subplots_adjust(hspace=0.35, wspace=0.35, left=0.075, right=0.925, top=0.90, bottom=0.075)
-
-    for i in range(0, row_max):
-        axs[i].plot(traw, dataRaw['T']['X'].iloc[:, i])
-        axs[i].set_title('Input Feature: ' + inpLabel[i])
-        axs[i].grid(True)
-        try:
-            axs[i].set_ylabel(inpLabel[i] + ' (' + setupDat['inpUnits'][inpLabel[i]][0] + ')')
-        except:
-            axs[i].set_ylabel(inpLabel[i] + ' (-)')
+    # fig, axs = plt.subplots(row_max, 1, sharex=True)
+    # txt = "Time-domain plots of input features"
+    # plt.suptitle(txt, size=18)
+    # plt.subplots_adjust(hspace=0.35, wspace=0.35, left=0.075, right=0.925, top=0.90, bottom=0.075)
+    #
+    # for i in range(0, row_max):
+    #     axs[i].plot(traw, dataRaw['T']['X'].iloc[:, i])
+    #     axs[i].set_title('Input Feature: ' + inpLabel[i])
+    #     axs[i].grid(True)
+    #     try:
+    #         axs[i].set_ylabel(inpLabel[i] + ' (' + setupDat['inpUnits'][inpLabel[i]][0] + ')')
+    #     except:
+    #         axs[i].set_ylabel(inpLabel[i] + ' (-)')
 
     # ==============================================================================
     # Average Performance
@@ -170,30 +172,30 @@ def plotting(dataRaw, data, dataPred, resultsAvg, feaScore, feaError, setupDat, 
     plt.title("Scattering Prediction and Residuals")
     plt.legend(outLabel)
 
-    # ------------------------------------------
-    # Error Distribution
-    # ------------------------------------------
-    plt.subplot(2, 2, 3)
-    xminG = +np.Inf
-    xmaxG = -np.Inf
-    for i in range(0, setupDat['numOut']):
-        idx = (data['y'][:, i] != 0)
-        mu, std = norm.fit((data['y'][idx, i] - dataPred['y'][idx, i]))
-        [_, _] = kstest((data['y'][idx, i] - dataPred['y'][idx, i]), 'norm')
-        plt.hist((data['y'][idx, i] - dataPred['y'][idx, i]), bins=25, density=True, alpha=0.6)
-        xmin, xmax = plt.xlim()
-        if xmin < xminG:
-            xminG = xmin
-        if xmax > xmaxG:
-            xmaxG = xmax
-        x = np.linspace(xminG, xmaxG, 100)
-        p = norm.pdf(x, mu, std)
-        plt.plot(x, p, linewidth=2, color=colors[i])
-    plt.title("Fit Error Gaussian Distribution")
-    plt.xlabel('Error ' + '(' + setupDat['outUnits'][outLabel[0]][0] + ')')
-    plt.ylabel("Density")
-    plt.legend(outLabel)
-    plt.grid(True)
+    # # ------------------------------------------
+    # # Error Distribution
+    # # ------------------------------------------
+    # plt.subplot(2, 2, 3)
+    # xminG = +np.Inf
+    # xmaxG = -np.Inf
+    # for i in range(0, setupDat['numOut']):
+    #     idx = (data['y'][:, i] != 0)
+    #     mu, std = norm.fit((data['y'][idx, i] - dataPred['y'][idx, i]))
+    #     [_, _] = kstest((data['y'][idx, i] - dataPred['y'][idx, i]), 'norm')
+    #     plt.hist((data['y'][idx, i] - dataPred['y'][idx, i]), bins=25, density=True, alpha=0.6)
+    #     xmin, xmax = plt.xlim()
+    #     if xmin < xminG:
+    #         xminG = xmin
+    #     if xmax > xmaxG:
+    #         xmaxG = xmax
+    #     x = np.linspace(xminG, xmaxG, 100)
+    #     p = norm.pdf(x, mu, std)
+    #     plt.plot(x, p, linewidth=2, color=colors[i])
+    # plt.title("Fit Error Gaussian Distribution")
+    # plt.xlabel('Error ' + '(' + setupDat['outUnits'][outLabel[0]][0] + ')')
+    # plt.ylabel("Density")
+    # plt.legend(outLabel)
+    # plt.grid(True)
 
     # ------------------------------------------
     # Classical Learning
